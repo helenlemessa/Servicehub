@@ -35,7 +35,7 @@ const allowedOrigins = [
   process.env.FRONTEND_URL
 ].filter(Boolean);
 
-// Configure CORS properly - FIXED
+// Configure CORS properly
 const corsOptions = {
   origin: function(origin, callback) {
     // Allow requests with no origin (like mobile apps, curl, etc.)
@@ -62,7 +62,7 @@ app.options('*', cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Socket.io with CORS - FIXED (removed trailing slash)
+// Socket.io with CORS
 const io = socketIo(server, {
   cors: {
     origin: allowedOrigins,
@@ -80,6 +80,27 @@ app.use((req, res, next) => {
   next();
 });
 
+// Root route to check API status
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'ServiceHub API is running',
+    status: 'ok',
+    mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Debug endpoint to check CORS configuration
+app.get('/api/debug-cors', (req, res) => {
+  res.json({
+    message: 'CORS debug',
+    allowedOrigins: allowedOrigins,
+    frontendUrl: process.env.FRONTEND_URL,
+    requestOrigin: req.headers.origin,
+    mongodbStatus: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+  });
+});
+
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', require('./routes/users'));
@@ -94,19 +115,33 @@ app.use('/api/search', require('./routes/search'));
 const setupSocket = require('./socket/socketManager');
 setupSocket(io);
 
-// Database connection
-console.log('🔄 Attempting to connect to MongoDB...');
-console.log('MongoDB URI:', process.env.MONGODB_URI ? 'URI exists' : 'URI missing');
+// Database connection - UPDATED with better error handling
+const MONGODB_URI = process.env.MONGODB_URI;
 
-mongoose.connect(process.env.MONGODB_URI, {
+if (!MONGODB_URI) {
+  console.error('❌ FATAL ERROR: MONGODB_URI is not defined in environment variables');
+  process.exit(1);
+}
+
+// Log MongoDB URI (hide password for security)
+const maskedUri = MONGODB_URI.replace(/\/\/([^:]+):([^@]+)@/, '//***:***@');
+console.log('🔄 Attempting to connect to MongoDB...');
+console.log(`MongoDB URI: ${maskedUri}`);
+
+mongoose.connect(MONGODB_URI, {
   serverSelectionTimeoutMS: 30000,
   socketTimeoutMS: 45000,
+  connectTimeoutMS: 30000,
 })
 .then(() => {
   console.log('✅ MongoDB connected successfully');
 })
 .catch((err) => {
   console.error('❌ MongoDB connection error:', err.message);
+  console.error('Please check:');
+  console.error('1. MongoDB Atlas IP whitelist - Add 0.0.0.0/0 to Network Access');
+  console.error('2. MongoDB credentials are correct');
+  console.error('3. Connection string includes database name');
 });
 
 mongoose.connection.on('error', (err) => {
@@ -114,7 +149,14 @@ mongoose.connection.on('error', (err) => {
 });
 
 mongoose.connection.on('disconnected', () => {
-  console.log('Mongoose disconnected');
+  console.log('⚠️ Mongoose disconnected, attempting to reconnect...');
+});
+
+// Handle graceful shutdown
+process.on('SIGINT', async () => {
+  await mongoose.connection.close();
+  console.log('MongoDB connection closed through app termination');
+  process.exit(0);
 });
 
 const PORT = process.env.PORT || 5000;
