@@ -1,0 +1,146 @@
+/* frontend/src/index.css - COMPLETE WORKING VERSION */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base light mode styles */
+body {
+  background-color: #f9fafb;
+  color: #111827;
+}
+
+/* Dark mode styles - ONLY when .dark class is on html element */
+.dark body {
+  background-color: #111827;
+  color: #f3f4f6;
+}
+
+/* Force background colors for common elements in dark mode */
+.dark .bg-white {
+  background-color: #1f2937 !important;
+}
+
+.dark .bg-gray-50 {
+  background-color: #111827 !important;
+}
+
+.dark .bg-gray-100 {
+  background-color: #374151 !important;
+}
+
+.dark .bg-blue-50 {
+  background-color: #1e3a5f !important;
+}
+
+/* Border colors in dark mode */
+.dark .border,
+.dark .border-t,
+.dark .border-b,
+.dark .border-gray-200,
+.dark .border-gray-100 {
+  border-color: #374151 !important;
+}
+
+/* Text colors in dark mode */
+.dark .text-gray-500,
+.dark .text-gray-400,
+.dark .text-gray-600 {
+  color: #9ca3af !important;
+}
+
+.dark .text-gray-700,
+.dark .text-gray-800,
+.dark .text-gray-900 {
+  color: #f3f4f6 !important;
+}
+
+/* Shadows in dark mode */
+.dark .shadow,
+.dark .shadow-md,
+.dark .shadow-lg,
+.dark .shadow-xl {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px -1px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Hover effects in dark mode */
+.dark .hover\:bg-gray-100:hover {
+  background-color: #374151 !important;
+}
+
+.dark .hover\:bg-gray-50:hover {
+  background-color: #1f2937 !important;
+}
+
+/* Scrollbar - light mode */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Scrollbar - dark mode */
+.dark ::-webkit-scrollbar-track {
+  background: #1f2937;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+/* Animations */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message-enter {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Chat specific - these need !important for layout */
+body.active-chat-page .mobile-bottom-nav {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  body.active-chat-page .chat-container {
+    height: 100vh !important;
+    height: 100dvh !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    z-index: 100 !important;
+    background: #f3f4f6 !important;
+  }
+  
+  body.active-chat-page .message-input-wrapper {
+    padding-bottom: env(safe-area-inset-bottom, 12px) !important;
+  }
+}
+
+.dark body.active-chat-page .chat-container {
+  background: #1f2937 !important;
+}
