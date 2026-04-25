@@ -41,7 +41,10 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Socket.io with CORS
 const io = socketIo(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    origin: [
+    'http://localhost:5173',
+    'https://servicehub-psi.vercel.app/'// Add your Netlify URL if using
+  ],
     credentials: true,
     methods: ['GET', 'POST'],
   },

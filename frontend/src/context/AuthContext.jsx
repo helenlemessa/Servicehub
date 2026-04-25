@@ -3,7 +3,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 
 const AuthContext = createContext();
-
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
@@ -13,7 +13,7 @@ const refreshUser = async () => {
   await fetchProfile();
 };
   // Configure axios
-  axios.defaults.baseURL = '/api';
+  axios.defaults.baseURL = API_URL;
   axios.defaults.withCredentials = true;
 
   // Check for token on startup
