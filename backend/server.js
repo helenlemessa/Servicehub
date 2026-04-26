@@ -100,7 +100,9 @@ app.get('/api/debug-cors', (req, res) => {
     mongodbStatus: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
   });
 });
-
+app.get('/api/ip', (req, res) => {
+  res.json({ ip: req.connection.remoteAddress });
+});
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', require('./routes/users'));
