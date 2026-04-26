@@ -84,8 +84,6 @@ const fetchProfile = async () => {
     console.log('Logging in with:', email);
     const { data } = await axios.post('/auth/login', { email, password });
     console.log('Login response:', data);
-    console.log('Login - following array:', data.following);
-    console.log('Login - following type:', typeof data.following[0]);
     
     localStorage.setItem('token', data.token);
     axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
@@ -95,12 +93,12 @@ const fetchProfile = async () => {
     return { success: true };
   } catch (error) {
     console.error('Login error:', error.response?.data);
+    // Get the specific error message from the backend
     const message = error.response?.data?.message || 'Login failed';
     toast.error(message);
     return { success: false, error: message };
   }
 };
-
   const logout = () => {
     console.log('Logging out');
     localStorage.removeItem('token');

@@ -92,18 +92,25 @@ router.post(
   }
 );
 // Login - Updated to include following and followers
+// Login - Updated with specific error messages
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   try {
+    // Check if user exists
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(401).json({ 
+        message: 'No account found with this email address. Please sign up first.' 
+      });
     }
 
+    // Check password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(401).json({ 
+        message: 'Incorrect password. Please try again.' 
+      });
     }
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'secret123', {
@@ -126,7 +133,7 @@ router.post('/login', async (req, res) => {
     });
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Server error. Please try again later.' });
   }
 });
 

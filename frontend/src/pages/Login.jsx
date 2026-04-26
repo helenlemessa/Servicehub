@@ -62,35 +62,42 @@ const Login = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  
+  if (!validateForm()) {
+    return;
+  }
 
-    setLoading(true);
-    const result = await login(email, password);
+  setLoading(true);
+  const result = await login(email, password);
+  
+  if (result.success) {
+    toast.success('Logged in successfully!');
+    navigate('/dashboard');
+  } else {
+    // Display specific error message
+    const errorMsg = result.error || 'Login failed';
     
-    if (result.success) {
-      toast.success('Logged in successfully!');
-      navigate('/dashboard');
+    // Better error detection
+    const lowerError = errorMsg.toLowerCase();
+    
+    if (lowerError.includes('user not found') || 
+        lowerError.includes('no user') || 
+        lowerError.includes('invalid email') ||
+        lowerError.includes('account not found')) {
+      setErrors({ email: 'No account found with this email address. Please sign up first.' });
+      toast.error('No account found with this email address');
+    } else if (lowerError.includes('password') || lowerError.includes('credentials')) {
+      setErrors({ password: 'Incorrect password. Please try again.' });
+      toast.error('Incorrect password');
     } else {
-      // Display specific error message
-      const errorMsg = result.error || 'Login failed';
+      setErrors({ general: errorMsg });
       toast.error(errorMsg);
-      
-      // Set field-specific errors based on the error message
-      if (errorMsg.toLowerCase().includes('email') || errorMsg.toLowerCase().includes('user')) {
-        setErrors({ email: 'No account found with this email address' });
-      } else if (errorMsg.toLowerCase().includes('password') || errorMsg.toLowerCase().includes('credentials')) {
-        setErrors({ password: 'Incorrect password. Please try again.' });
-      } else {
-        setErrors({ general: errorMsg });
-      }
     }
-    setLoading(false);
-  };
+  }
+  setLoading(false);
+};
 
   return (
     <div className={`min-h-[calc(100vh-64px)] flex items-center justify-center ${bgColor} py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-200`}>
