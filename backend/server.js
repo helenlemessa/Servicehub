@@ -80,7 +80,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Root route to check API status
+// ========== ROOT AND DEBUG ROUTES ==========
 app.get('/', (req, res) => {
   res.json({ 
     message: 'ServiceHub API is running',
@@ -90,7 +90,6 @@ app.get('/', (req, res) => {
   });
 });
 
-// Debug endpoint to check CORS configuration
 app.get('/api/debug-cors', (req, res) => {
   res.json({
     message: 'CORS debug',
@@ -100,10 +99,17 @@ app.get('/api/debug-cors', (req, res) => {
     mongodbStatus: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
   });
 });
+
+// IP endpoint - KEEP ONLY ONE
 app.get('/api/ip', (req, res) => {
-  res.json({ ip: req.connection.remoteAddress });
+  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.connection.remoteAddress;
+  res.json({ 
+    ip: ip,
+    message: 'This is the IP address Render is using to connect to MongoDB'
+  });
 });
-// Routes
+
+// ========== API ROUTES ==========
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/services', require('./routes/services'));
@@ -112,14 +118,12 @@ app.use('/api/messages', require('./routes/messages'));
 app.use('/api/reviews', require('./routes/reviews'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/search', require('./routes/search'));
-app.get('/api/ip', (req, res) => {
-  res.json({ ip: req.connection.remoteAddress });
-});
+
 // Socket.io setup
 const setupSocket = require('./socket/socketManager');
 setupSocket(io);
 
-// Database connection - UPDATED with better error handling
+// Database connection
 const MONGODB_URI = process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {
