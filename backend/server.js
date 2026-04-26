@@ -110,7 +110,9 @@ app.use('/api/messages', require('./routes/messages'));
 app.use('/api/reviews', require('./routes/reviews'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/search', require('./routes/search'));
-
+app.get('/api/ip', (req, res) => {
+  res.json({ ip: req.connection.remoteAddress });
+});
 // Socket.io setup
 const setupSocket = require('./socket/socketManager');
 setupSocket(io);
